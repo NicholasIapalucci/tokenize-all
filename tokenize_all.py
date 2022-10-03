@@ -51,7 +51,7 @@ class TokenizableLanguage:
         TokenIdentifier("constant", r"[A-Z]+\b"),
         TokenIdentifier("class name", r"[A-Z](\w)*\b"),
         TokenIdentifier("function", r"([A-Za-z_]\w*)\s*\(", 1),
-        TokenIdentifier("identifier", r"[A-Za-z_]\w*\b"),
+        TokenIdentifier("identifier", r"[a-z_]\w*\b"),
     ]
 
     def __init__(self, identifiers: list[TokenIdentifier]):
@@ -61,14 +61,16 @@ class TokenizableLanguage:
         tokens = []
         pos = 0
         while(code):
+            match_found = False
             while(code.startswith("\n")):
                 code = code[1:]
-            for identifier in TokenizableLanguage.default_identifiers + self.identifiers:
-                match = regex.match(r"\s+", code)
+            for identifier in self.identifiers + TokenizableLanguage.default_identifiers:
+                match = regex.match(r"^\s+", code)
                 if (match):
                     code = code[len(match.group()):]
                     pos += len(match.group())
-                    continue
+                    match_found = True
+                    break
                 match = regex.match(identifier.regex, code)
                 if (match):
                     str_match = match.group(identifier.group)
@@ -81,6 +83,9 @@ class TokenizableLanguage:
                     code = code[len(str_match):]
                     pos += len(str_match)
                     tokens.append(token)
+                    match_found = True
+                    break
+            if not match_found: raise Exception("No match found: " + code)
         return tokens
 
 
