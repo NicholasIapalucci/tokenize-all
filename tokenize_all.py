@@ -43,7 +43,15 @@ class TokenizableLanguage:
         TokenIdentifier("semicolon", r"^;"),
         TokenIdentifier("left bracket", r"^\["),
         TokenIdentifier("right bracket", r"^\]"),
-        TokenIdentifier("dot", r"^\.")
+        TokenIdentifier("dot", r"^\."),
+        TokenIdentifier("colon", r"^:"),
+        TokenIdentifier("number", r"-?\d+(\.\d+)?"),
+        TokenIdentifier("operation", r"(=(==?)?\+|-|\*|/|%|&&?|\|\|?|!)", 1),
+        TokenIdentifier("string", r'"([^"]|\\")*"'),
+        TokenIdentifier("constant", r"[A-Z]+\b"),
+        TokenIdentifier("class name", r"[A-Z](\w)*\b"),
+        TokenIdentifier("function", r"([A-Za-z_]\w*)\s*\(", 1),
+        TokenIdentifier("identifier", r"[A-Za-z_]\w*\b"),
     ]
 
     def __init__(self, identifiers: list[TokenIdentifier]):
@@ -51,9 +59,10 @@ class TokenizableLanguage:
 
     def tokenize(self, code) -> list[Token]:
         tokens = []
-        code = regex.sub("\n", " ", code)
         pos = 0
         while(code):
+            while(code.startswith("\n")):
+                code = code[1:]
             for identifier in TokenizableLanguage.default_identifiers + self.identifiers:
                 match = regex.match(r"\s+", code)
                 if (match):
@@ -75,28 +84,37 @@ class TokenizableLanguage:
         return tokens
 
 
-Java = TokenizableLanguage(
+C = TokenizableLanguage(
     identifiers = [
-        TokenIdentifier("keyword", r"(abstract|assert|boolean|break|byte|case|catch|char|class|continue|default|do|double|else|enum|extends|final|finally|float|for|if|implements|import|instanceof|int|interface|long|native|new|null|package|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volative|while)\b", 1),
-        TokenIdentifier("string", r'"([^"]|\\")*"'),
-        TokenIdentifier("number", r"-?\d+(\.\d+)?"),
-        TokenIdentifier("operation", r"(=|==|\+|-|\*|/|%|&&|\|\||!)", 1),
-        TokenIdentifier("constant", r"[A-Z]+\b"),
-        TokenIdentifier("class name", r"[A-Z](\w)*\b"),
-        TokenIdentifier("function", r"([A-Za-z_]\w*)\s*\(", 1),
-        TokenIdentifier("identifier", r"[A-Za-z_]\w*\b"),
+        TokenIdentifier("keyword", r"(auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b"),
+        TokenIdentifier("comment", r"//[^\n]*"),
     ]
 )
 
-tokens = Java.tokenize(
-"""
-public class Main {
+Cpp = TokenizableLanguage(
+    identifiers = [
+        TokenIdentifier("keyword", r"(alignas|alignof|and|and_eq|asm|atomic|cancel|atomic|commit|atomic|noexcept|auto|bitand|bitor|bool|break|case|catch|char|char8_t|char16_t|char32_t|class|compl|concept|const|consteval|constexpr|constinit|const_cast|continue|co_await|co_return|co_yield|decltype|default|delete|do|double|dynaimc_cast|else|enum|explicit|export|extern|false|float|for|friend|goto|if|inline|int|long|mutable|namespace|new|noexcept|not|not_eq|nullptr|operator|or|or_eq|private|protected|public|reflexpr|register|reinterpret_cast|requires|return|short|signed|sizeof|static|static_assert|static_cast|struct|switch|synchronized|template|this|thread_local|throw|true|try|typedef|typeid|typename|union|unsigned|using|virtual|void|volatile|wchar_t|while|xor|xor_eq)\b"),
 
-    public static void main(String[] args) {
-        System.out.println("hello world");
-    }
-}
-"""
+    ]
 )
 
-for token in tokens: print(token)
+Java = TokenizableLanguage(
+    identifiers = [
+        TokenIdentifier("keyword", r"(abstract|assert|boolean|break|byte|case|catch|char|class|continue|default|do|double|else|enum|extends|final|finally|float|for|if|implements|import|instanceof|int|interface|long|native|new|null|package|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|try|void|volative|while)\b", 1),
+        TokenIdentifier("comment", r"//[^\n]*")
+    ]
+)
+
+Python = TokenizableLanguage(
+    identifiers = [
+        TokenIdentifier("keyword", r"(and|as|assert|break|class|continue|def|del|elif|else|except|False|finally|for|from|global|if|import|in|is|lambda|None|nonlocal|not|or|pass|raise|return|True|try|while|with|yield)\b"),
+        TokenIdentifier("comment", r"#[^\n]*"),
+    ]
+)
+
+TypeScript = TokenizableLanguage(
+    identifiers = [
+        TokenIdentifier("keyword", r"(any|as|boolean|break|case|catch|class|const|constructor|continue|debugger|declare|default|delete|do|else|enum|export|extends|false|finally|for|from|function|get|if|implements|import|in|instanceof|interface|new|let|module|null|number|of|package|private|protected|public|require|return|set|super|static|string|switch|symbol|this|throw|true|try|type|typeof|var|void|while|with|yield)\b"),
+        TokenIdentifier("comment", r"//[^\n]*")
+    ]
+)
