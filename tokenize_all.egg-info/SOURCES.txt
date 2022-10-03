@@ -1,0 +1,8 @@
+LICENSE
+README.md
+pyproject.toml
+tokenize_all.py
+tokenize_all.egg-info/PKG-INFO
+tokenize_all.egg-info/SOURCES.txt
+tokenize_all.egg-info/dependency_links.txt
+tokenize_all.egg-info/top_level.txt

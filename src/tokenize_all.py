@@ -45,13 +45,15 @@ class TokenizableLanguage:
         TokenIdentifier("right bracket", r"^\]"),
         TokenIdentifier("dot", r"^\."),
         TokenIdentifier("colon", r"^:"),
-        TokenIdentifier("number", r"-?\d+(\.\d+)?"),
-        TokenIdentifier("operation", r"(=(==?)?\+|-|\*|/|%|&&?|\|\|?|!)", 1),
-        TokenIdentifier("string", r'"([^"]|\\")*"'),
-        TokenIdentifier("constant", r"[A-Z]+\b"),
-        TokenIdentifier("class name", r"[A-Z](\w)*\b"),
-        TokenIdentifier("function", r"([A-Za-z_]\w*)\s*\(", 1),
-        TokenIdentifier("identifier", r"[a-z_]\w*\b"),
+        TokenIdentifier("number", r"^-?\d+(\.\d+)?"),
+        TokenIdentifier("operation", r"^(=(==?)?\+|-|\*|/|%|&&?|\|\|?|!)", 1),
+        TokenIdentifier("string", r'^"([^"]|\\")*"'),
+        TokenIdentifier("constant", r"^[A-Z]+\b"),
+        TokenIdentifier("class name", r"^[A-Z](\w)*\b"),
+        TokenIdentifier("function", r"^([A-Za-z_]\w*)\s*\(", 1),
+        TokenIdentifier("identifier", r"^[a-z_]\w*\b"),
+        TokenIdentifier("whitespace", r"^\s+"),
+        TokenIdentifier("newline", r"^\n+")
     ]
 
     def __init__(self, identifiers: list[TokenIdentifier]):
@@ -65,12 +67,6 @@ class TokenizableLanguage:
             while(code.startswith("\n")):
                 code = code[1:]
             for identifier in self.identifiers + TokenizableLanguage.default_identifiers:
-                match = regex.match(r"^\s+", code)
-                if (match):
-                    code = code[len(match.group()):]
-                    pos += len(match.group())
-                    match_found = True
-                    break
                 match = regex.match(identifier.regex, code)
                 if (match):
                     str_match = match.group(identifier.group)
