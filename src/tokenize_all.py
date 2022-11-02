@@ -124,9 +124,10 @@ class TokenizableLanguage:
             id_dict[identifier.type] = identifier
 
         # Reverse identifier dictionary so that arguments come first (and thus their regexs have priority)
-        self.identifiers = list(id_dict.values()).reverse()
-                    
+        self.identifiers = list(id_dict.values())
+        self.identifiers.reverse()
 
+        
     def tokenize(self, code) -> list[Token]:
         """
         Tokenizes the given code snippet into a `list` of `Tokens` using this `TokenizableLanguage`.
