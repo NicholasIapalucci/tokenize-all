@@ -73,6 +73,7 @@ class TokenizableLanguage:
 
     identifiers: list[TokenIdentifier]
     default_identifiers = [
+        TokenIdentifier("identifier", r"^[a-z_]\w*\b"),
         TokenIdentifier("left parentheses", r"^\("),
         TokenIdentifier("right parentheses", r"^\)"),
         TokenIdentifier("left brace", r"^\{"),
@@ -88,12 +89,10 @@ class TokenizableLanguage:
         TokenIdentifier("constant", r"^[A-Z_]+\b"),
         TokenIdentifier("class name", r"^[A-Z](\w)*\b"),
         TokenIdentifier("function", r"^([A-Za-z_]\w*)\s*\(", 1),
-        TokenIdentifier("identifier", r"^[a-z_]\w*\b"),
         TokenIdentifier("whitespace", r"^\s+"),
         TokenIdentifier("newline", r"^\n+"),
         TokenIdentifier("comment", r"^//[^\n]*"),
-        TokenIdentifier("star", r"^\*"),
-        TokenIdentifier("spread", "...")
+        TokenIdentifier("spread", r"\.{3}")
     ]
 
     def __init__(self, identifiers: list[TokenIdentifier]):
