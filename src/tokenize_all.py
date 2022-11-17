@@ -16,7 +16,7 @@ class Token:
     The part of the token's match that represents the actual value of the token, such as `public` for a `keyword` token. This differs from `full_match` in that some token types have to check characters around the token to correctly identify it, and those characters are not included in the value of the token itself.
     """
 
-    full_match: str
+    full_match: regex.Match[str]
     """
     The entire match of the token's regular expression. The exact definition of this varies from implementation to implementation, but in general it refers to the `0` group of the regular expression used to identify the token. 
     """
@@ -27,7 +27,7 @@ class Token:
     end: int
     """The index of the entire code block at which the last letter of this token lies. """
 
-    def __init__(self, type: str, value: str, full_match: regex.Match, start: int, end: int):
+    def __init__(self, type: str, value: str, full_match: regex.Match[str], start: int, end: int):
         """
         Creates a new `Token`. 
 
@@ -63,7 +63,7 @@ class TokenIdentifier:
     group: int
     type: str
 
-    def __init__(self, token_type, regex, group = 0, has_sub_tokens = False):
+    def __init__(self, token_type: str, regex: str, group: int = 0, has_sub_tokens: bool = False):
         self.regex = regex if regex.startswith("^") else f"^{regex}"
         self.type = token_type
         self.group = group
@@ -81,10 +81,8 @@ class TokenizableLanguage:
         TokenIdentifier("semicolon", r"^;"),
         TokenIdentifier("left bracket", r"^\["),
         TokenIdentifier("right bracket", r"^\]"),
-        TokenIdentifier("dot", r"^\."),
-        TokenIdentifier("colon", r"^:"),
         TokenIdentifier("number", r"^-?\d+(\.\d+)?"),
-        TokenIdentifier("operation", r"^(=(==?)?\+|-|\*|/|%|&&?|\|\|?|!)", 1),
+        TokenIdentifier("symbol", r"^(=|\+|\-|\*|<|>|/|%|&|\||!|\.|\:)", 1),
         TokenIdentifier("string", r'^"([^"]|\\")*"'),
         TokenIdentifier("constant", r"^[A-Z_]+\b"),
         TokenIdentifier("class name", r"^[A-Z](\w)*\b"),
@@ -92,7 +90,7 @@ class TokenizableLanguage:
         TokenIdentifier("whitespace", r"^\s+"),
         TokenIdentifier("newline", r"^\n+"),
         TokenIdentifier("comment", r"^//[^\n]*"),
-        TokenIdentifier("spread", r"\.{3}")
+        TokenIdentifier("comma", r",")
     ]
 
     def __init__(self, identifiers: list[TokenIdentifier]):
@@ -112,7 +110,7 @@ class TokenizableLanguage:
         """
 
         # Empty dictionary
-        id_dict = {}
+        id_dict: dict[str, TokenIdentifier] = {}
 
         # Add default identifiers 
         for default_identifier in TokenizableLanguage.default_identifiers:
@@ -127,11 +125,11 @@ class TokenizableLanguage:
         self.identifiers.reverse()
 
         
-    def tokenize(self, code) -> list[Token]:
+    def tokenize(self, code: str) -> list[Token]:
         """
         Tokenizes the given code snippet into a `list` of `Tokens` using this `TokenizableLanguage`.
         """
-        tokens = []
+        tokens: list[Token] = []
         pos = 0
         while(code):
             match_found = False
@@ -153,7 +151,7 @@ class TokenizableLanguage:
                     tokens.append(token)
                     match_found = True
                     break
-            if not match_found: raise Exception("No match found: " + code)
+            if not match_found: raise Exception("Unrecognized Token: " + code)
         return tokens
 
 
@@ -164,32 +162,6 @@ C = TokenizableLanguage(
         TokenIdentifier("keyword", r"(auto|break|case|char|const|continue|default|do|double|else|enum|extern|float|for|goto|if|int|long|register|return|short|signed|sizeof|static|struct|switch|typedef|union|unsigned|void|volatile|while)\b"),
     ]
 )
-"""
-The `C` programming language, instantiated as a `TokenizableLanguage`.
-
-### Keyword recognition
-All of the following, and no others, are recognized as reserved keywords in the `C` language:
-
-`auto`, `break`, `case`, `char`, `const`, `continue`, `default`, `do`, `double`, `else`, `enum`, `extern`, `float`, `for`, `goto`, `if`, `int`, `long`, `register`, `return`, `short`, `signed`, `sizeof`, `static`, `struct`, `switch`, `typedef`, `union`, `unsigned`, `void`, `volatile`, and `while`.
-
-### Comment recognition
-Comments are interpreted as a double forward slash (`//`) followed by all non-newline characters. 
-
-### Identifier recognition
-A valid `C` identifier is recognized as a letter followed by either a letter, digit, or underscore, zero or more times. 
-
-### Class recognition
-A class name is recognized as a valid identifier that begins with a capital letter.
-
-### Function recognition
-A function is recognied by any valid identifier, followed by zero or more whitespace, followed by a left parentheses. The parentheses will not be included in the token's value.
-
-### String recognition
-A string is recognied as an opening double quotes (`"`), followed by any character that is either a non-double quote character or an escaped double quote (`\\"`) zero or more times, followed by a closing double quotes (`"`).
-
-### Constant recognition
-A constant is recognized as a valid identifier that only contains capital letters and underscores.
-"""
 
 Cpp = TokenizableLanguage(
     identifiers = [
